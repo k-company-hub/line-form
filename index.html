@@ -104,12 +104,14 @@
       });
 
       document.getElementById("successMsg").style.display = "block";
-document.querySelector("h2").style.display = "none";
-document.querySelectorAll("label, input, select, button, .checkbox-group").forEach(el => el.style.display = "none");
-setTimeout(() => liff.closeWindow(), 2000);    }
+      document.querySelector("h2").style.display = "none";
+      document.querySelectorAll("label, input, select, button, .checkbox-group").forEach(el => el.style.display = "none");
+      setTimeout(() => liff.closeWindow(), 2000);    }
   </script>
-<div id="successMsg" style="display:none; text-align:center; padding:60px 20px;">
+  
+  <div id="successMsg" style="display:none; text-align:center; padding:60px 20px;">
   <p style="font-size:18px; font-weight:bold;">送信が完了しました</p>
-</div>
+  </div>
+  
 </body>
 </html>
