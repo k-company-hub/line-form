@@ -4,56 +4,98 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>お申し込みフォーム</title>
-  <script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
     body { font-family: sans-serif; padding: 20px; max-width: 480px; margin: 0 auto; }
-    input { width: 100%; padding: 10px; margin: 8px 0 16px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; }
+    input, select { width: 100%; padding: 10px; margin: 8px 0 16px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; }
     button { width: 100%; padding: 12px; background: #06C755; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; }
     label { font-weight: bold; }
+    .checkbox-group { margin: 8px 0 16px; }
+    .checkbox-group label { font-weight: normal; display: block; margin: 6px 0; }
   </style>
 </head>
 <body>
   <h2>お申し込みフォーム</h2>
-  <label>お名前</label>
+
+  <label>① お名前</label>
   <input type="text" id="name" placeholder="山田 太郎">
-  <label>メールアドレス</label>
-  <input type="email" id="email" placeholder="example@email.com">
-  <label>電話番号</label>
+
+  <label>② 電話番号</label>
   <input type="tel" id="phone" placeholder="090-0000-0000">
+
+  <label>③ 居住エリア</label>
+  <select id="area">
+    <option value="">選択してください</option>
+    <option value="福岡市東区">福岡市東区</option>
+    <option value="福岡市博多区">福岡市博多区</option>
+    <option value="福岡市中央区">福岡市中央区</option>
+    <option value="福岡市南区">福岡市南区</option>
+    <option value="福岡市西区">福岡市西区</option>
+    <option value="福岡市城南区">福岡市城南区</option>
+    <option value="福岡市早良区">福岡市早良区</option>
+    <option value="筑紫地区">筑紫地区</option>
+    <option value="朝倉地区">朝倉地区</option>
+    <option value="筑後地区">筑後地区</option>
+  </select>
+
+  <label>④ 悩み（複数選択可）</label>
+  <div class="checkbox-group">
+    <label><input type="checkbox" value="移動"> 移動</label>
+    <label><input type="checkbox" value="入浴"> 入浴</label>
+    <label><input type="checkbox" value="排泄"> 排泄</label>
+    <label><input type="checkbox" value="睡眠"> 睡眠</label>
+    <label><input type="checkbox" value="その他"> その他</label>
+  </div>
+
+  <label>⑤ 希望</label>
+  <select id="hope">
+    <option value="">選択してください</option>
+    <option value="未利用">未利用</option>
+    <option value="レンタル中">レンタル中</option>
+    <option value="購入希望">購入希望</option>
+  </select>
+
   <button onclick="submitForm()">送信する</button>
 
   <script>
     let lineUserId = "";
 
     liff.init({ liffId: "2009977292-OfXHlYpV" })
-  .then(() => {
-    if (!liff.isLoggedIn()) {
-      liff.login();
-    } else {
-      liff.getProfile().then(profile => {
-        lineUserId = profile.userId;
+      .then(() => {
+        if (!liff.isLoggedIn()) {
+          liff.login();
+        } else {
+          liff.getProfile().then(profile => {
+            lineUserId = profile.userId;
+          });
+        }
+      })
+      .catch((err) => {
+        alert("LIFFエラー: " + err.code + " / " + err.message);
       });
-    }
-  })
-  .catch((err) => {
-    alert("LIFFエラー: " + err.code + " / " + err.message);
-  });
 
     async function submitForm() {
       const name = document.getElementById("name").value;
-      const email = document.getElementById("email").value;
       const phone = document.getElementById("phone").value;
+      const area = document.getElementById("area").value;
+      const hope = document.getElementById("hope").value;
 
-      if (!name || !email || !phone) {
-        alert("全ての項目を入力してください");
+      const checkedWorries = Array.from(
+        document.querySelectorAll(".checkbox-group input:checked")
+      ).map(cb => cb.value).join("・");
+
+      if (!name || !phone || !area || !checkedWorries || !hope) {
+        alert("全ての項目を入力・選択してください");
         return;
       }
 
       const payload = {
         lineUserId: lineUserId,
         name: name,
-        email: email,
-        phone: phone
+        phone: phone,
+        area: area,
+        worry: checkedWorries,
+        hope: hope
       };
 
       await fetch("https://script.google.com/macros/s/AKfycbxWdbkMaek3ByD4cbVrKGJQBsVWyltgPmDIdpGhJOjxyV9VvcmWJgJnhTZhzq00WyL9/exec", {
