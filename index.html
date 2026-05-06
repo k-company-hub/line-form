@@ -12,50 +12,64 @@
     label { font-weight: bold; }
     .checkbox-group { margin: 8px 0 16px; }
     .checkbox-group label { font-weight: normal; display: block; margin: 6px 0; }
+    .error-msg { color: red; font-size: 14px; margin: -10px 0 10px; display: none; }
+    #successMsg { display: none; text-align: center; padding: 60px 20px; }
+    #successMsg p { font-size: 18px; font-weight: bold; }
   </style>
 </head>
 <body>
-  <h2>お申し込みフォーム</h2>
+  <h2 id="formTitle">お申し込みフォーム</h2>
 
-  <label>① お名前</label>
-  <input type="text" id="name" placeholder="山田 太郎">
+  <div id="formArea">
+    <label>① お名前</label>
+    <input type="text" id="name" placeholder="山田 太郎">
+    <p class="error-msg" id="nameError">お名前を入力してください</p>
 
-  <label>② 電話番号</label>
-  <input type="tel" id="phone" placeholder="090-0000-0000">
+    <label>② 電話番号</label>
+    <input type="tel" id="phone" placeholder="090-0000-0000">
+    <p class="error-msg" id="phoneError">電話番号を入力してください</p>
 
-  <label>③ 居住エリア</label>
-  <select id="area">
-    <option value="">選択してください</option>
-    <option value="福岡市東区">福岡市東区</option>
-    <option value="福岡市博多区">福岡市博多区</option>
-    <option value="福岡市中央区">福岡市中央区</option>
-    <option value="福岡市南区">福岡市南区</option>
-    <option value="福岡市西区">福岡市西区</option>
-    <option value="福岡市城南区">福岡市城南区</option>
-    <option value="福岡市早良区">福岡市早良区</option>
-    <option value="筑紫地区">筑紫地区</option>
-    <option value="朝倉地区">朝倉地区</option>
-    <option value="筑後地区">筑後地区</option>
-  </select>
+    <label>③ 居住エリア</label>
+    <select id="area">
+      <option value="">選択してください</option>
+      <option value="福岡市東区">福岡市東区</option>
+      <option value="福岡市博多区">福岡市博多区</option>
+      <option value="福岡市中央区">福岡市中央区</option>
+      <option value="福岡市南区">福岡市南区</option>
+      <option value="福岡市西区">福岡市西区</option>
+      <option value="福岡市城南区">福岡市城南区</option>
+      <option value="福岡市早良区">福岡市早良区</option>
+      <option value="筑紫地区">筑紫地区</option>
+      <option value="朝倉地区">朝倉地区</option>
+      <option value="筑後地区">筑後地区</option>
+    </select>
+    <p class="error-msg" id="areaError">居住エリアを選択してください</p>
 
-  <label>④ 悩み（複数選択可）</label>
-  <div class="checkbox-group">
-    <label><input type="checkbox" value="移動"> 移動</label>
-    <label><input type="checkbox" value="入浴"> 入浴</label>
-    <label><input type="checkbox" value="排泄"> 排泄</label>
-    <label><input type="checkbox" value="睡眠"> 睡眠</label>
-    <label><input type="checkbox" value="その他"> その他</label>
+    <label>④ 悩み（複数選択可）</label>
+    <div class="checkbox-group">
+      <label><input type="checkbox" value="移動"> 移動</label>
+      <label><input type="checkbox" value="入浴"> 入浴</label>
+      <label><input type="checkbox" value="排泄"> 排泄</label>
+      <label><input type="checkbox" value="睡眠"> 睡眠</label>
+      <label><input type="checkbox" value="その他"> その他</label>
+    </div>
+    <p class="error-msg" id="worryError">悩みを選択してください</p>
+
+    <label>⑤ 希望</label>
+    <select id="hope">
+      <option value="">選択してください</option>
+      <option value="相談">相談</option>
+      <option value="レンタル">レンタル</option>
+      <option value="購入">購入</option>
+    </select>
+    <p class="error-msg" id="hopeError">希望を選択してください</p>
+
+    <button onclick="submitForm()">送信する</button>
   </div>
 
-  <label>⑤ 希望</label>
-  <select id="hope">
-    <option value="">選択してください</option>
-    <option value="相談">相談</option>
-    <option value="レンタル">レンタル</option>
-    <option value="購入">購入</option>
-  </select>
-
-  <button onclick="submitForm()">送信する</button>
+  <div id="successMsg">
+    <p>送信が完了しました</p>
+  </div>
 
   <script>
     let lineUserId = "";
@@ -71,7 +85,7 @@
         }
       })
       .catch((err) => {
-        alert("LIFFエラー: " + err.code + " / " + err.message);
+        document.body.innerHTML = "<p style='color:red;padding:20px;'>エラーが発生しました：" + err.message + "</p>";
       });
 
     async function submitForm() {
@@ -79,15 +93,21 @@
       const phone = document.getElementById("phone").value;
       const area = document.getElementById("area").value;
       const hope = document.getElementById("hope").value;
-
       const checkedWorries = Array.from(
         document.querySelectorAll(".checkbox-group input:checked")
       ).map(cb => cb.value).join("・");
 
-      if (!name || !phone || !area || !checkedWorries || !hope) {
-        alert("全ての項目を入力・選択してください");
-        return;
-      }
+      let hasError = false;
+
+      document.querySelectorAll(".error-msg").forEach(el => el.style.display = "none");
+
+      if (!name) { document.getElementById("nameError").style.display = "block"; hasError = true; }
+      if (!phone) { document.getElementById("phoneError").style.display = "block"; hasError = true; }
+      if (!area) { document.getElementById("areaError").style.display = "block"; hasError = true; }
+      if (!checkedWorries) { document.getElementById("worryError").style.display = "block"; hasError = true; }
+      if (!hope) { document.getElementById("hopeError").style.display = "block"; hasError = true; }
+
+      if (hasError) return;
 
       const payload = {
         lineUserId: lineUserId,
@@ -103,15 +123,11 @@
         body: JSON.stringify(payload)
       });
 
+      document.getElementById("formArea").style.display = "none";
+      document.getElementById("formTitle").style.display = "none";
       document.getElementById("successMsg").style.display = "block";
-      document.querySelector("h2").style.display = "none";
-      document.querySelectorAll("label, input, select, button, .checkbox-group").forEach(el => el.style.display = "none");
-      setTimeout(() => liff.closeWindow(), 2000);    }
+      setTimeout(() => liff.closeWindow(), 2000);
+    }
   </script>
-  
-  <div id="successMsg" style="display:none; text-align:center; padding:60px 20px;">
-  <p style="font-size:18px; font-weight:bold;">送信が完了しました</p>
-  </div>
-  
 </body>
 </html>
