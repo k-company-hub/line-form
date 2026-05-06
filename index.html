@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>お申し込みフォーム</title>
+  <script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 480px; margin: 0 auto; }
+    input { width: 100%; padding: 10px; margin: 8px 0 16px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; }
+    button { width: 100%; padding: 12px; background: #06C755; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; }
+    label { font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2>お申し込みフォーム</h2>
+  <label>お名前</label>
+  <input type="text" id="name" placeholder="山田 太郎">
+  <label>メールアドレス</label>
+  <input type="email" id="email" placeholder="example@email.com">
+  <label>電話番号</label>
+  <input type="tel" id="phone" placeholder="090-0000-0000">
+  <button onclick="submitForm()">送信する</button>
+
+  <script>
+    let lineUserId = "";
+
+    liff.init({ liffId: "2009977292-OfXHlYpV" })
+      .then(() => {
+        if (!liff.isLoggedIn()) {
+          liff.login();
+        } else {
+          liff.getProfile().then(profile => {
+            lineUserId = profile.userId;
+          });
+        }
+      });
+
+    async function submitForm() {
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const phone = document.getElementById("phone").value;
+
+      if (!name || !email || !phone) {
+        alert("全ての項目を入力してください");
+        return;
+      }
+
+      const payload = {
+        lineUserId: lineUserId,
+        name: name,
+        email: email,
+        phone: phone
+      };
+
+      await fetch("https://script.google.com/macros/s/AKfycbxWdbkMaek3ByD4cbVrKGJQBsVWyltgPmDIdpGhJOjxyV9VvcmWJgJnhTZhzq00WyL9/exec", {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
+
+      alert("送信が完了しました！");
+      liff.closeWindow();
+    }
+  </script>
+</body>
+</html>
